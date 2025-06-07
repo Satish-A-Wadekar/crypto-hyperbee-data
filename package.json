@@ -6,16 +6,16 @@
   "description": "cryptocurrency data gathering solution",
   "main": "src/index.js",
   "scripts": {
-    "test": "node client/connection-test.js",
     "client": "node client/index.js",
-    "server": "node server/index.js"
+    "server": "node server/index.js",
+    "test": "node client/connection-test.js"
   },
   "dependencies": {
+    "@hyperswarm/dht": "^6.5.1",
     "@hyperswarm/rpc": "^3.3.2",
     "axios": "^1.9.0",
     "hyperbee": "^2.24.2",
     "hypercore": "^11.8.3",
-    "hyperdht": "^6.20.5",
     "node-cron": "^4.1.0"
   }
 }
