@@ -1,7 +1,7 @@
 'use strict'
 
 const RPC = require('@hyperswarm/rpc')
-const DHT = require('hyperdht')
+const DHT = require('@hyperswarm/dht')
 const Hypercore = require('hypercore')
 const Hyperbee = require('hyperbee')
 const crypto = require('crypto')
@@ -42,11 +42,20 @@ const main = async () => {
     })
     await hbee.ready()
 
-    // Generate or retrieve DHT seed
+    // Generate or retrieve DHT seed (Uint8Array format)
     let dhtSeed = (await hbee.get('dht-seed'))?.value
     if (!dhtSeed) {
         dhtSeed = crypto.randomBytes(32)
         await hbee.put('dht-seed', dhtSeed)
+    } else {
+        // Ensure seed is exactly 32 bytes
+        if (dhtSeed.length !== 32) {
+            console.log('Invalid seed length, generating new one')
+            dhtSeed = crypto.randomBytes(32)
+            await hbee.put('dht-seed', dhtSeed)
+        }
+        // Convert to Uint8Array if it's stored as Buffer
+        dhtSeed = dhtSeed.buffer ? dhtSeed : new Uint8Array(dhtSeed)
     }
 
     // Start DHT for service discovery
@@ -68,16 +77,27 @@ const main = async () => {
     if (!rpcSeed) {
         rpcSeed = crypto.randomBytes(32)
         await hbee.put('rpc-seed', rpcSeed)
+    } else {
+        // Ensure seed is exactly 32 bytes
+        if (rpcSeed.length !== 32) {
+            console.log('Invalid RPC seed length, generating new one')
+            rpcSeed = crypto.randomBytes(32)
+            await hbee.put('rpc-seed', rpcSeed)
+        }
+        rpcSeed = rpcSeed.buffer ? rpcSeed : new Uint8Array(rpcSeed)
     }
 
     // Setup RPC server
     const rpc = new RPC({
+        maxPeers: 10,  // Allow multiple connections
+        firewalled: false,  // Disable firewall for local testing
         connectionKeepAlive: 30000, // 30 second keep alive
         seed: rpcSeed,
         dht
     });
     const rpcServer = rpc.createServer()
     await rpcServer.listen()
+
     console.log('RPC server started listening on public key:', rpcServer.publicKey.toString('hex'))
 
     // data collection with retries
@@ -139,6 +159,10 @@ const main = async () => {
 
     rpcServer.respond('ping', async () => {
         return Buffer.from(JSON.stringify({ status: 'ok' }), 'utf-8')
+    })
+
+    rpcServer.on('connection', (socket) => {
+        socket.on('error', (err) => console.log('RPC socket error:', err))
     })
 }
 
