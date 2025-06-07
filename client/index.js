@@ -2,7 +2,6 @@
 
 const RPC = require('@hyperswarm/rpc')
 const DHT = require('@hyperswarm/dht')
-//const DHT = require('hyperdht')
 const Hypercore = require('hypercore')
 const Hyperbee = require('hyperbee')
 const crypto = require('crypto')
