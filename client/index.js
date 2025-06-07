@@ -1,7 +1,8 @@
 'use strict'
 
 const RPC = require('@hyperswarm/rpc')
-const DHT = require('hyperdht')
+const DHT = require('@hyperswarm/dht')
+//const DHT = require('hyperdht')
 const Hypercore = require('hypercore')
 const Hyperbee = require('hyperbee')
 const crypto = require('crypto')
@@ -35,12 +36,14 @@ const main = async () => {
         await dht.ready()
 
         // Replace with your server's public key (from server console output)
-        const serverPubKey = Buffer.from('3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29', 'hex')
+        const serverPubKey = Buffer.from('0a33b9b46e582620c86d200300bb87fd3d2a6d7e69f8e96d609186c20ed11e00', 'hex')
 
         // RPC client with connection timeout
         rpc = new RPC({
             dht,
-            connectionTimeout: 10000 // 10 second timeout
+            connectionTimeout: 15000, // 15 second timeout
+            maxPeers: 3,
+            firewalled: false
         })
 
         // Ensure we have a connection before making requests
@@ -93,7 +96,7 @@ const main = async () => {
     }
 }
 
-// Updated connection helper without dht.lookup
+// Updated connection helper that accepts dht parameter
 async function ensureConnection(rpc, dht, serverPubKey) {
     let attempts = 0
     const maxAttempts = 5
@@ -101,22 +104,25 @@ async function ensureConnection(rpc, dht, serverPubKey) {
 
     while (attempts < maxAttempts) {
         try {
-            // Try a simple ping to verify connection
+            // Try direct connection without DHT lookup
             const pingRes = await rpc.request(serverPubKey, 'ping', Buffer.from('{}'), {
                 timeout: 5000
             })
+            
+            // Verify ping response
             const response = JSON.parse(pingRes.toString())
             if (response.status !== 'ok') {
                 throw new Error('Invalid ping response')
             }
+            
             return true
         } catch (err) {
             attempts++
             if (attempts >= maxAttempts) {
                 throw new Error(`Connection failed after ${maxAttempts} attempts: ${err.message}`)
             }
-            console.log(`Attempt ${attempts} failed (${err.message}), retrying in ${retryDelay/1000}s...`)
-            await new Promise(resolve => setTimeout(resolve, retryDelay))
+            console.log(`Connection attempt ${attempts} failed (${err.message}), retrying...`)
+            await new Promise(r => setTimeout(r, retryDelay * attempts))
         }
     }
 }
