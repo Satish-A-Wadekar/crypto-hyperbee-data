@@ -1,4 +1,4 @@
-# The Tether challenge
+# The challenge
 
 Hi and congratulations to your progress with Tether!
 
