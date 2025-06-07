@@ -1,0 +1,22 @@
+{
+  "name": "crypto-data",
+  "version": "1.0.0",
+  "author": "satish wadekar",
+  "license": "MIT",
+  "description": "cryptocurrency data gathering solution",
+  "main": "src/index.js",
+  "scripts": {
+    "client": "node client/index.js",
+    "server": "node server/index.js",
+    "test": "node client/connection-test.js"
+  },
+  "dependencies": {
+    "@hyperswarm/rpc": "^3.3.2",
+    "axios": "^1.9.0",
+    "hyperbee": "^2.24.2",
+    "hypercore": "^11.8.3",
+    "hyperdht": "^6.20.5",
+    "node-cron": "^4.1.0"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
