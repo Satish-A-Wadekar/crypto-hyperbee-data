@@ -1,12 +1,16 @@
-const DHT = require('hyperdht')
+const DHT = require('@hyperswarm/dht')
 
 try {
-    const bootstrap = new DHT({
+    const node = new DHT({
         bootstrap: false,
         port: 30001,
-        host: '0.0.0.0'
-    });
-    console.log('Bootstrap node running on port 30001', bootstrap.bootstrapNodes);
+        host: '127.0.0.1'
+    })
+
+    console.log('Bootstrap node running on 127.0.0.1:30001')
+    node.on('listening', () => {
+        console.log('Ready for connections')
+    })
 } catch (e) {
     console.error(e);
 }
